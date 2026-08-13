@@ -1,37 +1,37 @@
-weekday,day_name,focus,sort,exercise,sets,reps,notes,image
-1,Monday,Push,1,Barbell bench press,4,8,,images/fitness-monday-push.png
-1,Monday,Push,2,Incline dumbbell press,3,10,,images/fitness-monday-push.png
-1,Monday,Push,3,Seated dumbbell shoulder press,3,8-10,,images/fitness-monday-push.png
-1,Monday,Push,4,Dumbbell lateral raise,4,12-15,,images/fitness-monday-push.png
-1,Monday,Push,5,Cable triceps pushdown,3,10-12,,images/fitness-monday-push.png
-1,Monday,Push,6,Incline treadmill walk,1,15-20 min,Moderate pace,images/fitness-monday-push.png
-2,Tuesday,Pull,1,Pull-up or lat pulldown,4,8-10,,images/fitness-tuesday-pull.png
-2,Tuesday,Pull,2,Barbell bent-over row,3,8-10,,images/fitness-tuesday-pull.png
-2,Tuesday,Pull,3,Seated cable row,3,10-12,,images/fitness-tuesday-pull.png
-2,Tuesday,Pull,4,Cable face pull,3,12-15,,images/fitness-tuesday-pull.png
-2,Tuesday,Pull,5,Dumbbell biceps curl,3,10-12,,images/fitness-tuesday-pull.png
-2,Tuesday,Pull,6,Hammer curl,2,10-12,,images/fitness-tuesday-pull.png
-2,Tuesday,Pull,7,Rowing machine,1,10-15 min,Moderate pace,images/fitness-tuesday-pull.png
-3,Wednesday,Legs,1,Back squat,4,6-8,,images/fitness-wednesday-legs.png
-3,Wednesday,Legs,2,Romanian deadlift,3,8-10,,images/fitness-wednesday-legs.png
-3,Wednesday,Legs,3,Leg press,3,10-12,,images/fitness-wednesday-legs.png
-3,Wednesday,Legs,4,Walking lunge,3,10/leg,,images/fitness-wednesday-legs.png
-3,Wednesday,Legs,5,Machine hamstring curl,3,10-12,,images/fitness-wednesday-legs.png
-3,Wednesday,Legs,6,Standing calf raise,4,12-15,,images/fitness-wednesday-legs.png
-3,Wednesday,Legs,7,Incline treadmill walk,1,15 min,Moderate pace,images/fitness-wednesday-legs.png
-4,Thursday,Active recovery,1,Walk,1,30-45 min,No lifting,images/fitness-recovery.png
-4,Thursday,Active recovery,2,Mobility or stretching,1,10-20 min,,images/fitness-recovery.png
-4,Thursday,Active recovery,3,Hydration and sleep,1,checklist,Food quality + water + sleep,images/fitness-recovery.png
-5,Friday,Upper strength,1,Barbell bench press,4,5-6,Heavier than Monday if form holds,images/fitness-friday-upper.png
-5,Friday,Upper strength,2,Barbell bent-over row,4,6-8,,images/fitness-friday-upper.png
-5,Friday,Upper strength,3,Standing overhead press,3,6-8,,images/fitness-friday-upper.png
-5,Friday,Upper strength,4,Pull-ups or assisted pull-ups,3,controlled,,images/fitness-friday-upper.png
-6,Saturday,Lower + core,1,Front squat,3,6-8,,images/fitness-saturday-lower-core.png
-6,Saturday,Lower + core,2,Bulgarian split squat,3,8-10/leg,,images/fitness-saturday-lower-core.png
-6,Saturday,Lower + core,3,Conventional deadlift,3,5,Moderate volume,images/fitness-saturday-lower-core.png
-6,Saturday,Lower + core,4,Hanging leg raise,3,8-12,,images/fitness-saturday-lower-core.png
-6,Saturday,Lower + core,5,Kneeling cable crunch,3,10-15,,images/fitness-saturday-lower-core.png
-6,Saturday,Lower + core,6,Forearm plank,3,30-60 sec,,images/fitness-saturday-lower-core.png
-0,Sunday,Recovery,1,Easy walk (optional),1,as desired,,images/fitness-recovery.png
-0,Sunday,Recovery,2,Prep food for the week,1,checklist,,images/fitness-recovery.png
-0,Sunday,Recovery,3,Review last week's log,1,checklist,Schedule next week,images/fitness-recovery.png
+weekday,day_name,focus,sort,exercise,sets,reps,equipment,how_to,notes,image
+1,Monday,Push,1,Barbell bench press,4,8,Barbell + flat bench + rack,"Lie on the bench, eyes under the bar. Unrack, lower to mid-chest with elbows about 45°. Press up without bouncing. Feet planted.","Rest 2–3 min",images/fitness-monday-push.png
+1,Monday,Push,2,Incline dumbbell press,3,10,Two dumbbells + incline bench (30–45°),"Sit, kick dumbbells to shoulders, press up and slightly together. Lower to chest line with control.",,images/fitness-monday-push.png
+1,Monday,Push,3,Seated dumbbell shoulder press,3,8-10,Two dumbbells + upright bench,"Sit tall, press dumbbells from ear height to lockout overhead. Don’t shrug or arch hard.",,images/fitness-monday-push.png
+1,Monday,Push,4,Dumbbell lateral raise,4,12-15,Two light dumbbells,"Slight bend in elbows. Raise arms to shoulder height, lead with elbows, lower slow. No swinging.",,images/fitness-monday-push.png
+1,Monday,Push,5,Cable triceps pushdown,3,10-12,Cable stack + straight or rope attachment,"Elbows pinned to sides. Push down until arms straighten, squeeze triceps, return without moving shoulders.",,images/fitness-monday-push.png
+1,Monday,Push,6,Incline treadmill walk,1,15-20 min,Treadmill,"Incline high, pace you can talk. This is the cardio finisher, not a sprint.","Moderate pace",images/fitness-monday-push.png
+2,Tuesday,Pull,1,Pull-up or lat pulldown,4,8-10,Pull-up bar or lat pulldown machine,"If pull-ups: dead hang, pull chest to bar, lower full. If pulldown: bar to upper chest, squeeze lats, don’t lean back hard.",,images/fitness-tuesday-pull.png
+2,Tuesday,Pull,2,Barbell bent-over row,3,8-10,Barbell,"Hinge to ~45°, back flat. Pull bar to lower ribs, pause, lower. No jerking.",,images/fitness-tuesday-pull.png
+2,Tuesday,Pull,3,Seated cable row,3,10-12,Seated cable row machine,"Sit tall, pull handle to stomach, squeeze shoulder blades, don’t shrug. Return with control.",,images/fitness-tuesday-pull.png
+2,Tuesday,Pull,4,Cable face pull,3,12-15,Cable + rope at face height,"Pull rope to face, elbows high, rotate so knuckles face back. Rear delts / upper back.",,images/fitness-tuesday-pull.png
+2,Tuesday,Pull,5,Dumbbell biceps curl,3,10-12,Two dumbbells,"Elbows still at sides. Curl without swinging. Squeeze at top, lower slow.",,images/fitness-tuesday-pull.png
+2,Tuesday,Pull,6,Hammer curl,2,10-12,Two dumbbells,"Palms face each other the whole time. Same strict curl path.",,images/fitness-tuesday-pull.png
+2,Tuesday,Pull,7,Rowing machine,1,10-15 min,Rower,"Easy-moderate pace. Legs then body then arms; reverse to return.","Moderate pace",images/fitness-tuesday-pull.png
+3,Wednesday,Legs,1,Back squat,4,6-8,Barbell + squat rack,"Bar on upper back, brace, sit between hips. Knees track toes. Stand all the way up.","Rest 2–3 min",images/fitness-wednesday-legs.png
+3,Wednesday,Legs,2,Romanian deadlift,3,8-10,Barbell,"Soft knees. Push hips back, bar close to legs, feel hamstrings. Stand by driving hips forward.",,images/fitness-wednesday-legs.png
+3,Wednesday,Legs,3,Leg press,3,10-12,Leg press machine,"Feet mid-platform. Lower until knees ~90°, don’t let low back lift. Press through mid-foot.",,images/fitness-wednesday-legs.png
+3,Wednesday,Legs,4,Walking lunge,3,10/leg,Bodyweight or dumbbells,"Long enough step that both knees bend ~90°. Front knee over mid-foot. Alternate legs.",,images/fitness-wednesday-legs.png
+3,Wednesday,Legs,5,Machine hamstring curl,3,10-12,Lying or seated hamstring curl,"Curl heels toward glutes, pause, lower slow. Hips stay down.",,images/fitness-wednesday-legs.png
+3,Wednesday,Legs,6,Standing calf raise,4,12-15,Calf raise machine or step + dumbbell,"Rise onto big toe, pause, lower heel below the step.",,images/fitness-wednesday-legs.png
+3,Wednesday,Legs,7,Incline treadmill walk,1,15 min,Treadmill,"Moderate incline walk to finish.","Moderate pace",images/fitness-wednesday-legs.png
+4,Thursday,Active recovery,1,Walk,1,30-45 min,None — outside or treadmill,"Easy walk. No lifting today. Talk-pace only.","No lifting",images/fitness-recovery.png
+4,Thursday,Active recovery,2,Mobility or stretching,1,10-20 min,Mat or open floor,"Hips, T-spine, shoulders. Gentle, no bouncing.",,images/fitness-recovery.png
+4,Thursday,Active recovery,3,Hydration and sleep,1,checklist,Water bottle,"Hit water, protein, and a real bedtime. Recovery is the session.","Food + water + sleep",images/fitness-recovery.png
+5,Friday,Upper strength,1,Barbell bench press,4,5-6,Barbell + flat bench + rack,"Same setup as Monday, heavier if form is clean. Full control, no bounce.","Heavier than Monday if form holds",images/fitness-friday-upper.png
+5,Friday,Upper strength,2,Barbell bent-over row,4,6-8,Barbell,"Hinge, flat back, pull to ribs. Heavier than Tuesday only if you stay tight.",,images/fitness-friday-upper.png
+5,Friday,Upper strength,3,Standing overhead press,3,6-8,Barbell,"Bar at shoulders, brace glutes, press straight up. Head through at the top. No excessive lean.",,images/fitness-friday-upper.png
+5,Friday,Upper strength,4,Pull-ups or assisted pull-ups,3,controlled,Pull-up bar or assisted machine,"Full hang to chin over bar (or chest toward bar). Slow lower. Band or machine if needed.",,images/fitness-friday-upper.png
+6,Saturday,Lower + core,1,Front squat,3,6-8,Barbell + rack,"Bar on front delts, elbows high. Sit down between hips, torso upright.",,images/fitness-saturday-lower-core.png
+6,Saturday,Lower + core,2,Bulgarian split squat,3,8-10/leg,Bench + dumbbells optional,"Back foot on bench. Front shin vertical. Drop straight down, don’t slam the knee.",,images/fitness-saturday-lower-core.png
+6,Saturday,Lower + core,3,Conventional deadlift,3,5,Barbell + plates,"Bar over mid-foot, hinge and grip. Push floor away, stand tall, lower with control. Moderate load.","Moderate volume",images/fitness-saturday-lower-core.png
+6,Saturday,Lower + core,4,Hanging leg raise,3,8-12,Pull-up bar or captain’s chair,"Hang still. Raise legs with abs, not swing. Lower slow.",,images/fitness-saturday-lower-core.png
+6,Saturday,Lower + core,5,Kneeling cable crunch,3,10-15,Cable + rope,"Kneel facing stack, crunch ribs toward hips. Don’t yank with arms.",,images/fitness-saturday-lower-core.png
+6,Saturday,Lower + core,6,Forearm plank,3,30-60 sec,Mat,"Elbows under shoulders, body in a straight line. Squeeze glutes. Breathe.",,images/fitness-saturday-lower-core.png
+0,Sunday,Recovery,1,Easy walk (optional),1,as desired,None,"Optional easy walk. No structured lifting.",,images/fitness-recovery.png
+0,Sunday,Recovery,2,Prep food for the week,1,checklist,Kitchen,"Protein + produce ready so training week doesn’t stall.",,images/fitness-recovery.png
+0,Sunday,Recovery,3,Review last week's log,1,checklist,This tracker,"Export CSV if you want a backup. Tap next week’s days and plan loads.",,images/fitness-recovery.png

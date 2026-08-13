@@ -4,14 +4,11 @@ Static HTML + CSV for the 12-week body recomposition plan.
 
 ## Use
 
-Host the whole `workout-tracker` folder (Netlify, GitHub Pages, or any static host).  
-Or from this folder:
+Open `index.html` in a browser (double-click is fine). The plan is built into the page.
 
-```
-npx --yes serve .
-```
+You should see: **Today: [session name]**, equipment list, the day poster, then each lift with how-to + set checkboxes.
 
-Then open the URL it prints. Don’t double-click `index.html` — the browser blocks `plan.csv`.
+Thursday in this plan is recovery. Upper strength is **Friday** — tap Fri if that’s the session you want.
 
 ## Files
 
