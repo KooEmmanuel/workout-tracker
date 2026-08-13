@@ -46,7 +46,7 @@
     .equip strong { display: block; margin-bottom: 4px; }
     .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin: 12px 0; }
     label { font-size: 12px; color: var(--mute); display: block; margin-bottom: 4px; }
-    input, button {
+    input, button, select {
       font: inherit; border-radius: 8px; border: 1px solid var(--line);
       background: #fff; color: var(--ink); padding: 8px 10px;
     }
@@ -58,6 +58,9 @@
       width: 100%; border-radius: 14px; border: 1px solid var(--line);
       display: block; margin: 0 0 16px; background: #fff;
     }
+    .hero[hidden] { display: none; }
+    .timer[hidden] { display: none; }
+    .next-lifts { margin: 0; padding-left: 1.2em; }
     .card {
       background: var(--card); border: 1px solid var(--line);
       border-radius: 14px; padding: 16px; margin-bottom: 14px;
@@ -73,13 +76,25 @@
     .set.done { border-color: var(--done); background: var(--done-bg); }
     .set input[type="number"] { width: 76px; padding: 4px 6px; }
     .note { font-size: 13px; color: var(--mute); margin-top: 10px; }
-    footer { color: var(--mute); font-size: 13px; padding-bottom: 40px; }
+    .last { font-size: 13px; color: var(--amber); margin: 0 0 8px; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+    .timer {
+      position: sticky; bottom: 0; background: #fff; border-top: 1px solid var(--line);
+      padding: 10px 16px; display: flex; gap: 8px; align-items: center; justify-content: center;
+    }
+    .timer strong { font-size: 1.4rem; min-width: 4ch; text-align: center; }
+    .week-status { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
+    .pill { font-size: 12px; border-radius: 999px; padding: 3px 8px; border: 1px solid var(--line); }
+    .pill.ok { background: var(--done-bg); border-color: var(--done); color: var(--done); }
+    .pill.miss { background: #fef2f2; border-color: #b91c1c; color: #b91c1c; }
+    .warn { background: #fff7ed; border: 1px solid #fdba74; border-radius: 10px; padding: 10px 12px; margin: 10px 0 0; }
+    footer { color: var(--mute); font-size: 13px; padding-bottom: 80px; }
   </style>
 </head>
 <body>
   <header>
     <h1>What to do today</h1>
-    <p class="sub">Your 12-week plan: session, equipment, how to do each lift, then check the sets.</p>
+    <p class="sub" id="sub">Today’s session from your plan. Check off what you finish.</p>
     <div class="bar">
       <div>
         <label for="start">Plan start (week 1 Monday)</label>
@@ -96,55 +111,87 @@
   <main>
     <section class="today" id="banner"></section>
     <img class="hero" id="hero" alt="Session guide" />
+    <div id="warmup"></div>
+    <div id="checkin"></div>
     <div id="list"></div>
+    <div class="row" id="finish"></div>
   </main>
-  <footer>
-    Thursday in this plan is recovery. Upper-body strength is Friday — tap <strong>Fri</strong> if that is the session you want.
-    Rest 2–3 minutes on heavy compounds, 60–90 seconds on smaller lifts.
-  </footer>
+  <div class="timer" id="timer">
+    <span>Rest</span>
+    <button type="button" data-sec="90">1:30</button>
+    <button type="button" data-sec="180">3:00</button>
+    <strong id="clock">—</strong>
+    <button type="button" id="stop-timer">Stop</button>
+  </div>
+  <footer id="foot"></footer>
   <script>
     const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
     const KEY = "recomp-logs-v1";
     const START_KEY = "recomp-start";
+    const CHECK_KEY = "recomp-checkin-v1";
+    const DONE_KEY = "recomp-sessions-v1";
+    let timerId = null;
+    let left = 0;
 
-    const PLAN = [
-      {weekday:1,focus:"Push",sort:1,exercise:"Barbell bench press",sets:4,reps:"8",equipment:"Barbell, flat bench, rack",how:"Lie on the bench, eyes under the bar. Unrack, lower to mid-chest with elbows about 45°. Press up without bouncing. Feet stay planted.",notes:"Rest 2–3 min",image:"images/fitness-monday-push.png"},
-      {weekday:1,focus:"Push",sort:2,exercise:"Incline dumbbell press",sets:3,reps:"10",equipment:"Two dumbbells, incline bench (30–45°)",how:"Sit, kick the dumbbells to your shoulders, press up and slightly together. Lower to chest line with control.",image:"images/fitness-monday-push.png"},
-      {weekday:1,focus:"Push",sort:3,exercise:"Seated dumbbell shoulder press",sets:3,reps:"8–10",equipment:"Two dumbbells, upright bench",how:"Sit tall. Press from ear height to lockout overhead. Don’t shrug or over-arch.",image:"images/fitness-monday-push.png"},
-      {weekday:1,focus:"Push",sort:4,exercise:"Dumbbell lateral raise",sets:4,reps:"12–15",equipment:"Two light dumbbells",how:"Soft elbows. Raise to shoulder height, lead with elbows, lower slow. No swinging.",image:"images/fitness-monday-push.png"},
-      {weekday:1,focus:"Push",sort:5,exercise:"Cable triceps pushdown",sets:3,reps:"10–12",equipment:"Cable stack, straight bar or rope",how:"Elbows pinned to your sides. Push down until arms straighten, then return without moving the shoulders.",image:"images/fitness-monday-push.png"},
-      {weekday:1,focus:"Push",sort:6,exercise:"Incline treadmill walk",sets:1,reps:"15–20 min",equipment:"Treadmill",how:"High incline, talk-pace walk. This is the finisher, not a sprint.",notes:"Moderate",image:"images/fitness-monday-push.png"},
-      {weekday:2,focus:"Pull",sort:1,exercise:"Pull-up or lat pulldown",sets:4,reps:"8–10",equipment:"Pull-up bar or lat pulldown",how:"Pull-up: dead hang, pull chest toward the bar, lower fully. Pulldown: bar to upper chest, squeeze lats.",image:"images/fitness-tuesday-pull.png"},
-      {weekday:2,focus:"Pull",sort:2,exercise:"Barbell bent-over row",sets:3,reps:"8–10",equipment:"Barbell",how:"Hinge to about 45°, back flat. Pull the bar to your lower ribs, pause, lower. No jerking.",image:"images/fitness-tuesday-pull.png"},
-      {weekday:2,focus:"Pull",sort:3,exercise:"Seated cable row",sets:3,reps:"10–12",equipment:"Seated cable row",how:"Sit tall, pull to the stomach, squeeze shoulder blades, don’t shrug.",image:"images/fitness-tuesday-pull.png"},
-      {weekday:2,focus:"Pull",sort:4,exercise:"Cable face pull",sets:3,reps:"12–15",equipment:"Cable + rope at face height",how:"Pull the rope to your face, elbows high. Rear delts and upper back.",image:"images/fitness-tuesday-pull.png"},
-      {weekday:2,focus:"Pull",sort:5,exercise:"Dumbbell biceps curl",sets:3,reps:"10–12",equipment:"Two dumbbells",how:"Elbows stay at your sides. No swing. Squeeze at the top, lower slow.",image:"images/fitness-tuesday-pull.png"},
-      {weekday:2,focus:"Pull",sort:6,exercise:"Hammer curl",sets:2,reps:"10–12",equipment:"Two dumbbells",how:"Palms face each other the whole time. Same strict path as the curl.",image:"images/fitness-tuesday-pull.png"},
-      {weekday:2,focus:"Pull",sort:7,exercise:"Rowing machine",sets:1,reps:"10–15 min",equipment:"Rower",how:"Moderate pace. Legs, then body, then arms — reverse to return.",image:"images/fitness-tuesday-pull.png"},
-      {weekday:3,focus:"Legs",sort:1,exercise:"Back squat",sets:4,reps:"6–8",equipment:"Barbell + squat rack",how:"Bar on upper back, brace, sit between the hips. Knees track toes. Stand all the way up.",notes:"Rest 2–3 min",image:"images/fitness-wednesday-legs.png"},
-      {weekday:3,focus:"Legs",sort:2,exercise:"Romanian deadlift",sets:3,reps:"8–10",equipment:"Barbell",how:"Soft knees. Push hips back, bar close to the legs, feel hamstrings. Stand by driving hips forward.",image:"images/fitness-wednesday-legs.png"},
-      {weekday:3,focus:"Legs",sort:3,exercise:"Leg press",sets:3,reps:"10–12",equipment:"Leg press machine",how:"Feet mid-platform. Lower to about 90° at the knees. Don’t let the low back lift off.",image:"images/fitness-wednesday-legs.png"},
-      {weekday:3,focus:"Legs",sort:4,exercise:"Walking lunge",sets:3,reps:"10/leg",equipment:"Bodyweight or dumbbells",how:"Step long enough that both knees bend. Front knee over mid-foot. Alternate legs.",image:"images/fitness-wednesday-legs.png"},
-      {weekday:3,focus:"Legs",sort:5,exercise:"Machine hamstring curl",sets:3,reps:"10–12",equipment:"Lying or seated hamstring curl",how:"Curl heels toward glutes, pause, lower slow. Hips stay put.",image:"images/fitness-wednesday-legs.png"},
-      {weekday:3,focus:"Legs",sort:6,exercise:"Standing calf raise",sets:4,reps:"12–15",equipment:"Calf machine or step + dumbbell",how:"Rise onto the big toe, pause, lower the heel below the step.",image:"images/fitness-wednesday-legs.png"},
-      {weekday:3,focus:"Legs",sort:7,exercise:"Incline treadmill walk",sets:1,reps:"15 min",equipment:"Treadmill",how:"Moderate incline walk to finish.",image:"images/fitness-wednesday-legs.png"},
-      {weekday:4,focus:"Active recovery",sort:1,exercise:"Walk",sets:1,reps:"30–45 min",equipment:"None (outside or treadmill)",how:"Easy talk-pace walk. No lifting today.",notes:"Recovery day — upper body is Friday",image:"images/fitness-recovery.png"},
-      {weekday:4,focus:"Active recovery",sort:2,exercise:"Mobility or stretching",sets:1,reps:"10–20 min",equipment:"Mat or open floor",how:"Hips, mid-back, shoulders. Gentle, no bouncing.",image:"images/fitness-recovery.png"},
-      {weekday:4,focus:"Active recovery",sort:3,exercise:"Hydration and sleep",sets:1,reps:"checklist",equipment:"Water",how:"Hit water, protein, and a real bedtime. That is the work today.",image:"images/fitness-recovery.png"},
-      {weekday:5,focus:"Upper strength",sort:1,exercise:"Barbell bench press",sets:4,reps:"5–6",equipment:"Barbell, flat bench, rack",how:"Same as Monday, heavier only if the bar path stays clean. No bounce.",notes:"Heavier than Monday if form holds",image:"images/fitness-friday-upper.png"},
-      {weekday:5,focus:"Upper strength",sort:2,exercise:"Barbell bent-over row",sets:4,reps:"6–8",equipment:"Barbell",how:"Hinge, flat back, pull to the ribs. Stay tight — this is a strength day.",image:"images/fitness-friday-upper.png"},
-      {weekday:5,focus:"Upper strength",sort:3,exercise:"Standing overhead press",sets:3,reps:"6–8",equipment:"Barbell",how:"Bar at the shoulders, brace glutes, press straight up. Head through at the top.",image:"images/fitness-friday-upper.png"},
-      {weekday:5,focus:"Upper strength",sort:4,exercise:"Pull-ups or assisted pull-ups",sets:3,reps:"controlled",equipment:"Pull-up bar or assisted machine",how:"Full hang to chin over the bar. Slow lower. Use a band or machine if you need it.",image:"images/fitness-friday-upper.png"},
-      {weekday:6,focus:"Lower + core",sort:1,exercise:"Front squat",sets:3,reps:"6–8",equipment:"Barbell + rack",how:"Bar on the front delts, elbows high. Sit down, torso upright.",image:"images/fitness-saturday-lower-core.png"},
-      {weekday:6,focus:"Lower + core",sort:2,exercise:"Bulgarian split squat",sets:3,reps:"8–10/leg",equipment:"Bench, dumbbells optional",how:"Back foot on the bench. Drop straight down. Front shin stays fairly vertical.",image:"images/fitness-saturday-lower-core.png"},
-      {weekday:6,focus:"Lower + core",sort:3,exercise:"Conventional deadlift",sets:3,reps:"5",equipment:"Barbell + plates",how:"Bar over mid-foot. Push the floor away, stand tall, lower with control. Moderate load.",notes:"Moderate volume",image:"images/fitness-saturday-lower-core.png"},
-      {weekday:6,focus:"Lower + core",sort:4,exercise:"Hanging leg raise",sets:3,reps:"8–12",equipment:"Pull-up bar or captain’s chair",how:"Hang still. Raise the legs with the abs, not a swing.",image:"images/fitness-saturday-lower-core.png"},
-      {weekday:6,focus:"Lower + core",sort:5,exercise:"Kneeling cable crunch",sets:3,reps:"10–15",equipment:"Cable + rope",how:"Kneel facing the stack. Crunch ribs toward hips. Don’t yank with the arms.",image:"images/fitness-saturday-lower-core.png"},
-      {weekday:6,focus:"Lower + core",sort:6,exercise:"Forearm plank",sets:3,reps:"30–60 sec",equipment:"Mat",how:"Elbows under shoulders, body in one line. Squeeze glutes. Breathe.",image:"images/fitness-saturday-lower-core.png"},
-      {weekday:0,focus:"Recovery",sort:1,exercise:"Easy walk (optional)",sets:1,reps:"as desired",equipment:"None",how:"Optional easy walk. No structured lifting.",image:"images/fitness-recovery.png"},
-      {weekday:0,focus:"Recovery",sort:2,exercise:"Prep food for the week",sets:1,reps:"checklist",equipment:"Kitchen",how:"Get protein and produce ready so the training week doesn’t stall.",image:"images/fitness-recovery.png"},
-      {weekday:0,focus:"Recovery",sort:3,exercise:"Review last week’s log",sets:1,reps:"checklist",equipment:"This page",how:"Export the CSV if you want a backup. Set next week’s loads from what you actually lifted.",image:"images/fitness-recovery.png"}
-    ];
+    let PLAN = [];
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let field = "";
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (inQuotes) {
+          if (c === '"') {
+            if (text[i + 1] === '"') { field += '"'; i++; }
+            else inQuotes = false;
+          } else field += c;
+        } else if (c === '"') {
+          inQuotes = true;
+        } else if (c === ",") {
+          row.push(field);
+          field = "";
+        } else if (c === "\n" || c === "\r") {
+          if (c === "\r" && text[i + 1] === "\n") i++;
+          row.push(field);
+          field = "";
+          if (row.some((x) => x !== "")) rows.push(row);
+          row = [];
+        } else {
+          field += c;
+        }
+      }
+      if (field || row.length) {
+        row.push(field);
+        rows.push(row);
+      }
+      return rows;
+    }
+
+    async function loadPlan() {
+      const res = await fetch("plan.csv");
+      if (!res.ok) throw new Error("plan.csv " + res.status);
+      const rows = parseCSV(await res.text());
+      const headers = rows[0].map((h) => h.trim());
+      PLAN = rows.slice(1).map((cols) => {
+        const o = {};
+        headers.forEach((h, i) => { o[h] = (cols[i] || "").trim(); });
+        return {
+          weekday: Number(o.weekday),
+          focus: o.focus,
+          sort: Number(o.sort),
+          exercise: o.exercise,
+          sets: Number(o.sets) || 1,
+          reps: o.reps,
+          equipment: o.equipment,
+          how: o.how_to || o.how,
+          notes: o.notes,
+          log: o.log || "weight",
+          image: o.image
+        };
+      });
+    }
 
     const $ = (id) => document.getElementById(id);
 
@@ -161,6 +208,80 @@
     }
     function logKey(date, exercise, set) { return date + "|" + exercise + "|" + set; }
 
+    function lastWeight(exercise, beforeDate) {
+      const logs = loadLogs();
+      let best = null;
+      Object.values(logs).forEach((r) => {
+        if (r.exercise === exercise && r.weight && r.date && r.date < beforeDate) {
+          if (!best || r.date > best.date) best = r;
+        }
+      });
+      return best ? best.weight : "";
+    }
+
+    function sessionPct(date, wd) {
+      const rows = PLAN.filter((r) => r.weekday === wd);
+      let total = 0, done = 0;
+      const logs = loadLogs();
+      rows.forEach((r) => {
+        for (let i = 1; i <= r.sets; i++) {
+          total++;
+          if (logs[logKey(date, r.exercise, i)]?.done) done++;
+        }
+      });
+      return { total, done, pct: total ? Math.round(done / total * 100) : 0 };
+    }
+
+    function weekPills(date) {
+      const d = new Date(date + "T00:00:00");
+      const sunday = new Date(d);
+      sunday.setDate(d.getDate() - d.getDay());
+      return [1,2,3,4,5,6,0].map((wd) => {
+        const day = new Date(sunday);
+        day.setDate(sunday.getDate() + wd);
+        const iso = day.toISOString().slice(0, 10);
+        const focus = (PLAN.find((r) => r.weekday === wd) || {}).focus;
+        const { pct } = sessionPct(iso, wd);
+        const cls = pct >= 70 ? "ok" : (iso < date && wd !== 0 && wd !== 4 && pct === 0 ? "miss" : "");
+        return `<span class="pill ${cls}">${DAYS[wd].slice(0,3)} ${focus} ${pct}%</span>`;
+      }).join("");
+    }
+
+    function missedNote(date, wd) {
+      const d = new Date(date + "T00:00:00");
+      const sunday = new Date(d);
+      sunday.setDate(d.getDate() - d.getDay());
+      const bits = [];
+      [1, 2, 3, 5, 6].forEach((check) => {
+        const day = new Date(sunday);
+        day.setDate(sunday.getDate() + check);
+        const iso = day.toISOString().slice(0, 10);
+        if (iso >= date) return;
+        const focus = (PLAN.find((r) => r.weekday === check) || {}).focus;
+        if (sessionPct(iso, check).pct < 40) bits.push(`${DAYS[check]} ${focus}`);
+      });
+      return bits.length ? `<div class="warn"><strong>Not logged this week:</strong> ${bits.join(", ")}. Do the missed lift if you still have energy, or let it go and don’t stack two heavy days.</div>` : "";
+    }
+
+    function startTimer(sec) {
+      clearInterval(timerId);
+      left = sec;
+      $("clock").textContent = fmt(left);
+      timerId = setInterval(() => {
+        left -= 1;
+        $("clock").textContent = fmt(left);
+        if (left <= 0) {
+          clearInterval(timerId);
+          $("clock").textContent = "Go";
+          if (navigator.vibrate) navigator.vibrate(200);
+        }
+      }, 1000);
+    }
+    function fmt(s) {
+      if (s < 0) return "Go";
+      return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+    }
+
     function weekday() {
       const picked = $("days").dataset.weekday;
       if (picked !== undefined) return Number(picked);
@@ -175,44 +296,108 @@
       const focus = rows[0] ? rows[0].focus : "—";
       const gear = [...new Set(rows.map((r) => r.equipment))];
 
+      const prog = sessionPct(date, wd);
+      const liftDay = ![0, 4].includes(wd);
+      $("sub").textContent = liftDay
+        ? "Lifts, equipment, how to do them, last weight, then check sets."
+        : "Recovery day. Check these off. No weights today.";
       $("banner").innerHTML = `
-        <div class="kicker">Week ${week} of 12 · ${DAYS[wd]}</div>
+        <div class="kicker">Week ${week} of 12 · ${DAYS[wd]} · ${prog.done}/${prog.total} done (${prog.pct}%)</div>
         <h2>Today: ${focus}</h2>
-        <div class="equip"><strong>Bring / use</strong>${gear.join(" · ")}</div>
-        ${wd === 4 ? "<p class='note'>This plan’s Thursday is recovery. Upper strength is Friday — tap Fri above if you came to lift upper body.</p>" : ""}
+        <div class="equip"><strong>${liftDay ? "Bring / use" : "You need"}</strong>${gear.join(" · ")}</div>
+        <div class="week-status">${weekPills(date)}</div>
+        ${missedNote(date, wd)}
       `;
 
+      const fri = PLAN.filter((r) => r.weekday === 5).sort((a, b) => a.sort - b.sort);
+      if (liftDay) {
+        $("warmup").innerHTML = `<article class="card">
+          <h3>Warm-up (5–8 min)</h3>
+          <p class="how">Easy bike or walk 3 minutes. Then 2 light sets of the first lift before working sets. Don’t skip this on squat / bench / deadlift days.</p>
+        </article>`;
+      } else if (wd === 4) {
+        $("warmup").innerHTML = `<article class="card">
+          <h3>No lifting today</h3>
+          <p class="how">Walk, mobility, water, sleep. That is the whole session. Tomorrow is Friday upper strength.</p>
+          <ul class="next-lifts">${fri.map((r) => `<li><strong>${r.exercise}</strong> — ${r.sets} × ${r.reps}</li>`).join("")}</ul>
+          <p class="note">Tap <strong>Fri</strong> only if you are lifting upper body right now.</p>
+        </article>`;
+      } else {
+        $("warmup").innerHTML = `<article class="card">
+          <h3>Rest day</h3>
+          <p class="how">Optional walk, food prep, glance at last week. Next lift day is Monday Push.</p>
+        </article>`;
+      }
+      $("timer").hidden = !liftDay;
+      $("foot").innerHTML = liftDay
+        ? "Rest 2–3 minutes on heavy compounds, 60–90 seconds on smaller lifts."
+        : "Recovery is the work today. Next lift: Friday upper (bench, row, press, pull-ups).";
+
+      const checks = JSON.parse(localStorage.getItem(CHECK_KEY) || "{}");
+      const c = checks[date] || {};
+      $("checkin").innerHTML = wd === 6 ? `<article class="card">
+        <h3>Saturday check-in</h3>
+        <p class="how">Same time, same conditions. Don’t judge the week by scale alone.</p>
+        <div class="row">
+          <div><label>Weight (lb)</label><input type="number" step="0.1" id="bw" value="${c.weight || ""}" /></div>
+          <div><label>Waist (in)</label><input type="number" step="0.1" id="waist" value="${c.waist || ""}" /></div>
+          <div><label>Protein on track?</label>
+            <select id="protein"><option value="">—</option>
+              <option value="yes" ${c.protein==="yes"?"selected":""}>Yes</option>
+              <option value="no" ${c.protein==="no"?"selected":""}>No</option>
+            </select>
+          </div>
+          <button type="button" class="primary" id="save-checkin">Save check-in</button>
+        </div>
+      </article>` : "";
+
       const hero = $("hero");
-      if (rows[0]) { hero.src = rows[0].image; hero.hidden = false; }
-      else hero.hidden = true;
+      hero.hidden = true;
+      hero.alt = "";
+      if (rows[0] && rows[0].image) {
+        hero.onload = () => { hero.hidden = false; };
+        hero.onerror = () => { hero.hidden = true; };
+        hero.src = rows[0].image;
+      }
 
       const logs = loadLogs();
       $("list").innerHTML = rows.map((r) => {
+        const weighted = r.log !== "check";
+        const prev = weighted ? lastWeight(r.exercise, date) : "";
         let sets = "";
         for (let i = 1; i <= r.sets; i++) {
           const k = logKey(date, r.exercise, i);
           const rec = logs[k] || {};
+          const w = rec.weight || prev || "";
           sets += `<label class="set ${rec.done ? "done" : ""}">
-            <input type="checkbox" data-k="${k}" data-ex="${r.exercise}" data-set="${i}" ${rec.done ? "checked" : ""} />
-            Set ${i}
-            <input type="number" min="0" step="0.5" placeholder="lb" data-w="${k}" value="${rec.weight || ""}" />
+            <input type="checkbox" data-k="${k}" data-ex="${r.exercise}" data-set="${i}" data-log="${r.log}" ${rec.done ? "checked" : ""} />
+            ${weighted ? "Set " + i : "Done"}
+            ${weighted ? `<input type="number" min="0" step="0.5" placeholder="lb" data-w="${k}" value="${w}" />` : ""}
           </label>`;
         }
+        const lastLine = !weighted ? "" : (prev
+          ? `<p class="last">Last time you used ${prev} lb on this lift. Match it or add a little if it was easy.</p>`
+          : `<p class="last">First log for this lift — pick a weight you can do with 2 reps left.</p>`);
         return `<article class="card">
           <h3>${r.sort}. ${r.exercise}</h3>
-          <p class="meta"><strong>${r.sets} × ${r.reps}</strong> · Equipment: ${r.equipment}</p>
+          <p class="meta"><strong>${weighted ? r.sets + " × " + r.reps : r.reps}</strong> · ${r.equipment}</p>
+          ${lastLine}
           <p class="how">${r.how}</p>
           <div class="sets">${sets}</div>
           ${r.notes ? `<p class="note">${r.notes}</p>` : ""}
         </article>`;
       }).join("");
 
+      const sessions = JSON.parse(localStorage.getItem(DONE_KEY) || "{}");
+      $("finish").innerHTML = `<button type="button" class="primary" id="mark-done">${sessions[date] ? "Session saved" : "Mark session complete"}</button>
+        <span class="note">${prog.pct}% done</span>`;
+
       document.querySelectorAll("#days button").forEach((b) => {
         b.classList.toggle("on", Number(b.dataset.d) === wd);
       });
     }
 
-    function init() {
+    async function init() {
       const iso = new Date().toISOString().slice(0, 10);
       $("date").value = iso;
       $("start").value = localStorage.getItem(START_KEY) || "2026-07-28";
@@ -230,13 +415,34 @@
         const logs = loadLogs();
         const date = $("date").value;
         if (t.dataset.k) {
-          logs[t.dataset.k] = Object.assign(logs[t.dataset.k] || {}, { date, exercise: t.dataset.ex, set: t.dataset.set, done: t.checked });
+          const weightBox = t.parentElement.querySelector("input[type=number]");
+          logs[t.dataset.k] = Object.assign(logs[t.dataset.k] || {}, {
+            date, exercise: t.dataset.ex, set: t.dataset.set, done: t.checked,
+            weight: weightBox ? weightBox.value : (logs[t.dataset.k] || {}).weight
+          });
+          if (t.checked && t.dataset.log !== "check") startTimer(120);
         }
         if (t.dataset.w) {
           logs[t.dataset.w] = Object.assign(logs[t.dataset.w] || {}, { date, weight: t.value });
         }
         saveLogs(logs);
         render();
+      });
+      document.addEventListener("click", (e) => {
+        if (e.target.id === "save-checkin") {
+          const all = JSON.parse(localStorage.getItem(CHECK_KEY) || "{}");
+          all[$("date").value] = { weight: $("bw").value, waist: $("waist").value, protein: $("protein").value };
+          localStorage.setItem(CHECK_KEY, JSON.stringify(all));
+          e.target.textContent = "Saved";
+        }
+        if (e.target.id === "mark-done") {
+          const all = JSON.parse(localStorage.getItem(DONE_KEY) || "{}");
+          all[$("date").value] = true;
+          localStorage.setItem(DONE_KEY, JSON.stringify(all));
+          render();
+        }
+        if (e.target.dataset.sec) startTimer(Number(e.target.dataset.sec));
+        if (e.target.id === "stop-timer") { clearInterval(timerId); $("clock").textContent = "—"; }
       });
       $("export").addEventListener("click", () => {
         const logs = loadLogs();
@@ -250,7 +456,13 @@
         a.download = "workout-log.csv";
         a.click();
       });
-      render();
+      try {
+        await loadPlan();
+        render();
+      } catch (err) {
+        $("banner").innerHTML = "<p>Could not load <code>plan.csv</code>. Use the hosted page, not a double-clicked file.</p>";
+        console.error(err);
+      }
     }
     init();
   </script>
