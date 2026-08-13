@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Emmanuel — Workout tracker</title>
+  <style>
+    :root {
+      --bg: #12110f;
+      --card: #1c1a17;
+      --ink: #f3ebe0;
+      --mute: #a89a88;
+      --amber: #c4a574;
+      --line: #3a3228;
+      --done: #3d6b4f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    header, main { max-width: 880px; margin: 0 auto; padding: 16px; }
+    header { padding-top: 24px; }
+    h1 { font-size: 1.4rem; margin: 0 0 4px; }
+    .sub { color: var(--mute); margin: 0 0 16px; }
+    .bar {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: end;
+      margin-bottom: 16px;
+    }
+    label { font-size: 12px; color: var(--mute); display: block; margin-bottom: 4px; }
+    input, select, button {
+      font: inherit; border-radius: 8px; border: 1px solid var(--line);
+      background: var(--card); color: var(--ink); padding: 8px 10px;
+    }
+    button { cursor: pointer; }
+    button.primary { background: var(--amber); color: #1a140c; border-color: var(--amber); font-weight: 600; }
+    .hero {
+      width: 100%; border-radius: 12px; border: 1px solid var(--line);
+      display: block; margin: 0 0 16px; max-height: 280px; object-fit: cover;
+    }
+    .card {
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: 12px; padding: 14px; margin-bottom: 12px;
+    }
+    .card h2 { margin: 0 0 4px; font-size: 1.05rem; }
+    .meta { color: var(--mute); font-size: 13px; margin-bottom: 10px; }
+    .sets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .set {
+      display: flex; align-items: center; gap: 6px;
+      border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px;
+    }
+    .set.done { border-color: var(--done); background: #1a2a20; }
+    .set input[type="number"] { width: 72px; padding: 4px 6px; }
+    .weekdays { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .weekdays button { font-size: 13px; }
+    .weekdays button.on { background: var(--amber); color: #1a140c; border-color: var(--amber); }
+    footer { color: var(--mute); font-size: 12px; padding: 24px 16px 40px; max-width: 880px; margin: 0 auto; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>12-week recomposition</h1>
+    <p class="sub" id="status">Today’s session</p>
+    <div class="bar">
+      <div>
+        <label for="start">Plan start date</label>
+        <input type="date" id="start" />
+      </div>
+      <div>
+        <label for="date">Session date</label>
+        <input type="date" id="date" />
+      </div>
+      <button class="primary" id="export">Export log CSV</button>
+    </div>
+    <div class="weekdays" id="days"></div>
+  </header>
+  <main>
+    <img class="hero" id="hero" alt="" hidden />
+    <div id="list"></div>
+  </main>
+  <footer>
+    Plan lives in <code>plan.csv</code>. Logs stay in this browser until you export.
+    Rest 2–3 min on compounds, 60–90s on isolation.
+  </footer>
+  <script>
+    const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    const KEY = "recomp-logs-v1";
+    const START_KEY = "recomp-start";
+
+    const $ = (id) => document.getElementById(id);
+    let plan = [];
+
+    function parseCsv(text) {
+      const lines = text.trim().split(/\r?\n/);
+      const headers = lines.shift().split(",");
+      return lines.map((line) => {
+        const cols = [];
+        let cur = "", q = false;
+        for (const ch of line) {
+          if (ch === '"') q = !q;
+          else if (ch === "," && !q) { cols.push(cur); cur = ""; }
+          else cur += ch;
+        }
+        cols.push(cur);
+        const row = {};
+        headers.forEach((h, i) => row[h] = (cols[i] || "").trim());
+        row.weekday = Number(row.weekday);
+        row.sort = Number(row.sort);
+        row.sets = Number(row.sets);
+        return row;
+      });
+    }
+
+    function loadLogs() {
+      try { return JSON.parse(localStorage.getItem(KEY) || "{}"); }
+      catch { return {}; }
+    }
+    function saveLogs(logs) { localStorage.setItem(KEY, JSON.stringify(logs)); }
+
+    function weekNumber(start, date) {
+      const s = new Date(start + "T00:00:00");
+      const d = new Date(date + "T00:00:00");
+      const diff = Math.floor((d - s) / 86400000);
+      return Math.min(12, Math.max(1, Math.floor(diff / 7) + 1));
+    }
+
+    function logKey(date, exercise, set) {
+      return `${date}|${exercise}|${set}`;
+    }
+
+    function render() {
+      const date = $("date").value;
+      const start = $("start").value;
+      const picked = Number($("days").dataset.weekday);
+      const weekday = Number.isFinite(picked) ? picked : new Date(date + "T00:00:00").getDay();
+      const rows = plan.filter((r) => r.weekday === weekday).sort((a, b) => a.sort - b.sort);
+      const week = weekNumber(start, date);
+      const focus = rows[0];
+      $("status").textContent = `Week ${week} of 12 · ${DAYS[weekday]} · ${focus ? focus.focus : "—"}`;
+
+      const hero = $("hero");
+      if (focus && focus.image) {
+        hero.src = focus.image;
+        hero.alt = focus.focus;
+        hero.hidden = false;
+      } else hero.hidden = true;
+
+      const logs = loadLogs();
+      $("list").innerHTML = rows.map((r) => {
+        const sets = [];
+        for (let i = 1; i <= r.sets; i++) {
+          const k = logKey(date, r.exercise, i);
+          const rec = logs[k] || {};
+          sets.push(`
+            <label class="set ${rec.done ? "done" : ""}">
+              <input type="checkbox" data-k="${k}" data-ex="${r.exercise}" data-set="${i}" ${rec.done ? "checked" : ""} />
+              <span>Set ${i}</span>
+              <input type="number" min="0" step="0.5" placeholder="lb" data-w="${k}" value="${rec.weight || ""}" />
+            </label>`);
+        }
+        return `<article class="card">
+          <h2>${r.exercise}</h2>
+          <p class="meta">${r.sets} × ${r.reps}${r.notes ? " · " + r.notes : ""}</p>
+          <div class="sets">${sets.join("")}</div>
+        </article>`;
+      }).join("") || "<p class='sub'>No rows for this day in plan.csv</p>";
+
+      document.querySelectorAll("#days button").forEach((b) => {
+        b.classList.toggle("on", Number(b.dataset.d) === weekday);
+      });
+    }
+
+    function bind() {
+      $("list").addEventListener("change", (e) => {
+        const t = e.target;
+        const logs = loadLogs();
+        const date = $("date").value;
+        if (t.dataset.k) {
+          const k = t.dataset.k;
+          logs[k] = logs[k] || { date, exercise: t.dataset.ex, set: t.dataset.set };
+          logs[k].done = t.checked;
+          logs[k].date = date;
+        }
+        if (t.dataset.w) {
+          const k = t.dataset.w;
+          logs[k] = logs[k] || {};
+          logs[k].weight = t.value;
+          logs[k].date = date;
+        }
+        saveLogs(logs);
+        render();
+      });
+      $("date").addEventListener("change", () => {
+        delete $("days").dataset.weekday;
+        render();
+      });
+      $("start").addEventListener("change", () => {
+        localStorage.setItem(START_KEY, $("start").value);
+        render();
+      });
+      $("export").addEventListener("click", () => {
+        const logs = loadLogs();
+        const lines = [["date","exercise","set","weight","done"].join(",")];
+        Object.values(logs).forEach((r) => {
+          if (!r.date) return;
+          lines.push([r.date, `"${(r.exercise || "").replace(/"/g, '""')}"`, r.set || "", r.weight || "", r.done ? "1" : "0"].join(","));
+        });
+        const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "workout-log.csv";
+        a.click();
+      });
+    }
+
+    function dayButtons() {
+      $("days").innerHTML = DAYS.map((name, i) =>
+        `<button type="button" data-d="${i}">${name.slice(0, 3)}</button>`
+      ).join("");
+      $("days").addEventListener("click", (e) => {
+        const b = e.target.closest("button");
+        if (!b) return;
+        $("days").dataset.weekday = b.dataset.d;
+        render();
+      });
+    }
+
+    async function init() {
+      const today = new Date();
+      const iso = today.toISOString().slice(0, 10);
+      $("date").value = iso;
+      $("start").value = localStorage.getItem(START_KEY) || "2026-07-28";
+      dayButtons();
+      bind();
+      try {
+        const res = await fetch("plan.csv", { cache: "no-store" });
+        plan = parseCsv(await res.text());
+      } catch (err) {
+        $("list").innerHTML = "<p>Could not load plan.csv. Host this folder (or use a local server), don’t open the HTML as a raw file.</p>";
+        return;
+      }
+      render();
+    }
+    init();
+  </script>
+</body>
+</html>

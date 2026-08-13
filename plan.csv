@@ -1,0 +1,37 @@
+weekday,day_name,focus,sort,exercise,sets,reps,notes,image
+1,Monday,Push,1,Barbell bench press,4,8,,images/fitness-monday-push.png
+1,Monday,Push,2,Incline dumbbell press,3,10,,images/fitness-monday-push.png
+1,Monday,Push,3,Seated dumbbell shoulder press,3,8-10,,images/fitness-monday-push.png
+1,Monday,Push,4,Dumbbell lateral raise,4,12-15,,images/fitness-monday-push.png
+1,Monday,Push,5,Cable triceps pushdown,3,10-12,,images/fitness-monday-push.png
+1,Monday,Push,6,Incline treadmill walk,1,15-20 min,Moderate pace,images/fitness-monday-push.png
+2,Tuesday,Pull,1,Pull-up or lat pulldown,4,8-10,,images/fitness-tuesday-pull.png
+2,Tuesday,Pull,2,Barbell bent-over row,3,8-10,,images/fitness-tuesday-pull.png
+2,Tuesday,Pull,3,Seated cable row,3,10-12,,images/fitness-tuesday-pull.png
+2,Tuesday,Pull,4,Cable face pull,3,12-15,,images/fitness-tuesday-pull.png
+2,Tuesday,Pull,5,Dumbbell biceps curl,3,10-12,,images/fitness-tuesday-pull.png
+2,Tuesday,Pull,6,Hammer curl,2,10-12,,images/fitness-tuesday-pull.png
+2,Tuesday,Pull,7,Rowing machine,1,10-15 min,Moderate pace,images/fitness-tuesday-pull.png
+3,Wednesday,Legs,1,Back squat,4,6-8,,images/fitness-wednesday-legs.png
+3,Wednesday,Legs,2,Romanian deadlift,3,8-10,,images/fitness-wednesday-legs.png
+3,Wednesday,Legs,3,Leg press,3,10-12,,images/fitness-wednesday-legs.png
+3,Wednesday,Legs,4,Walking lunge,3,10/leg,,images/fitness-wednesday-legs.png
+3,Wednesday,Legs,5,Machine hamstring curl,3,10-12,,images/fitness-wednesday-legs.png
+3,Wednesday,Legs,6,Standing calf raise,4,12-15,,images/fitness-wednesday-legs.png
+3,Wednesday,Legs,7,Incline treadmill walk,1,15 min,Moderate pace,images/fitness-wednesday-legs.png
+4,Thursday,Active recovery,1,Walk,1,30-45 min,No lifting,images/fitness-recovery.png
+4,Thursday,Active recovery,2,Mobility or stretching,1,10-20 min,,images/fitness-recovery.png
+4,Thursday,Active recovery,3,Hydration and sleep,1,checklist,Food quality + water + sleep,images/fitness-recovery.png
+5,Friday,Upper strength,1,Barbell bench press,4,5-6,Heavier than Monday if form holds,images/fitness-friday-upper.png
+5,Friday,Upper strength,2,Barbell bent-over row,4,6-8,,images/fitness-friday-upper.png
+5,Friday,Upper strength,3,Standing overhead press,3,6-8,,images/fitness-friday-upper.png
+5,Friday,Upper strength,4,Pull-ups or assisted pull-ups,3,controlled,,images/fitness-friday-upper.png
+6,Saturday,Lower + core,1,Front squat,3,6-8,,images/fitness-saturday-lower-core.png
+6,Saturday,Lower + core,2,Bulgarian split squat,3,8-10/leg,,images/fitness-saturday-lower-core.png
+6,Saturday,Lower + core,3,Conventional deadlift,3,5,Moderate volume,images/fitness-saturday-lower-core.png
+6,Saturday,Lower + core,4,Hanging leg raise,3,8-12,,images/fitness-saturday-lower-core.png
+6,Saturday,Lower + core,5,Kneeling cable crunch,3,10-15,,images/fitness-saturday-lower-core.png
+6,Saturday,Lower + core,6,Forearm plank,3,30-60 sec,,images/fitness-saturday-lower-core.png
+0,Sunday,Recovery,1,Easy walk (optional),1,as desired,,images/fitness-recovery.png
+0,Sunday,Recovery,2,Prep food for the week,1,checklist,,images/fitness-recovery.png
+0,Sunday,Recovery,3,Review last week's log,1,checklist,Schedule next week,images/fitness-recovery.png
